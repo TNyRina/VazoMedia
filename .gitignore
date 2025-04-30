@@ -4,4 +4,55 @@
 # Ignore Gradle build output directory
 build
 
+# Ignore les fichiers de compilation
+/build/
+.gradle/
+
+# Fichiers d'IDE (comme Eclipse, IntelliJ IDEA, etc.)
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Fichiers de configuration de Gradle
+*.gradle
+gradle-wrapper.jar
+gradle-wrapper.properties
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers de logs
+*.log
+
+# Fichiers de configuration de test
+test-logs/
+
+# Fichiers générés
+*.class
+*.jar
+*.war
+*.ear
+
+# Répertoires temporaires de compilations
+/build/
+out/
+
+# Exclure les fichiers générés par le système de paquet (par exemple, sur Mac)
+.DS_Store
+
+# Fichiers de dépendances téléchargées via Gradle
+*.war
+*.ear
+
+# Ignorer les fichiers de configuration utilisateur de Gradle
+gradle.properties
+
+# Si vous utilisez une base de données embarquée
+hs_err_pid*
+
+# Fichiers Maven (si vous avez aussi un fichier pom.xml)
+target/
 
