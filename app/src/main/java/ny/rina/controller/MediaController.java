@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.FileChooser;
 import ny.rina.util.VideoUtil;
 
@@ -19,8 +20,24 @@ public class MediaController {
     Button playButton;
 
     @FXML
-    void play(){
-
+    void play(ActionEvent event){
+        if (mediaPlayer != null) {
+            Status status = mediaPlayer.getStatus();
+            switch (status) {
+                case READY:
+                case PAUSED:
+                case STOPPED:
+                    mediaPlayer.play();
+                    playButton.setText("Pause");
+                    break;
+                case PLAYING:
+                    mediaPlayer.pause();
+                    playButton.setText("Play");
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     @FXML
@@ -28,7 +45,7 @@ public class MediaController {
     
     @FXML
     void stop(){
-
+        mediaPlayer.stop();
     }
 
     @FXML
