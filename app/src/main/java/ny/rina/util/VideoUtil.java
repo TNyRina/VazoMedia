@@ -15,4 +15,11 @@ public class VideoUtil {
         mediaView.fitHeightProperty().bind(scene.heightProperty());
         mediaView.fitWidthProperty().bind(scene.widthProperty());
     }
+
+    public void unbindSizeProperty() {
+        mediaView.fitHeightProperty().unbind();
+        mediaView.fitWidthProperty().unbind();
+        mediaView.setFitWidth(200);
+        mediaView.setFitHeight(200);
+    }
 }

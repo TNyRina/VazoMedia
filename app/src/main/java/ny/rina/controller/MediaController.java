@@ -10,11 +10,13 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.FileChooser;
+import ny.rina.util.MediaUtil;
 import ny.rina.util.VideoUtil;
 
 public class MediaController {
     Media media;
     MediaPlayer mediaPlayer;
+    boolean isVideo = true;
 
     @FXML
     Button playButton;
@@ -45,7 +47,8 @@ public class MediaController {
     
     @FXML
     void stop(){
-        mediaPlayer.stop();
+        if (mediaPlayer != null)
+            mediaPlayer.stop();
     }
 
     @FXML
@@ -58,15 +61,24 @@ public class MediaController {
         File selectedFile = fileChooser.showOpenDialog(null);
 
         if (selectedFile != null) {
+
             String url = selectedFile.toURI().toString();
-            media = new Media(url);
+            media = new Media(url);            
             mediaPlayer = new MediaPlayer(media);
+            
+            mediaPlayer.setOnReady(() -> {
+                MediaUtil mediaUtil = new MediaUtil(media);
+                VideoUtil videoUtil = new VideoUtil(mediaView);
+                if (mediaUtil.hasVideo()) {
+                    videoUtil.fitSizeProperty();
+                } else {
+                    videoUtil.unbindSizeProperty();
+                }
+
+            });
+
+
             mediaView.setMediaPlayer(mediaPlayer);
-
-            VideoUtil videoUtil = new VideoUtil(mediaView);
-            videoUtil.fitSizeProperty();
-
-            mediaPlayer.setAutoPlay(false);
         }
     }
 
