@@ -16,7 +16,6 @@ import ny.rina.util.VideoUtil;
 public class MediaController {
     Media media;
     MediaPlayer mediaPlayer;
-    boolean isVideo = true;
 
     @FXML
     Button playButton;
@@ -58,37 +57,47 @@ public class MediaController {
 
     @FXML
     void select(ActionEvent event){
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select media");
-        File selectedFile = fileChooser.showOpenDialog(null);
-
+        File selectedFile = selectFile();
         if (selectedFile != null) {
-            if (mediaPlayer != null) resetMediaPlayer();
             String url = selectedFile.toURI().toString();
-            media = new Media(url);            
-            mediaPlayer = new MediaPlayer(media);
-            
-            mediaPlayer.setOnReady(() -> {
-                MediaUtil mediaUtil = new MediaUtil(media);
-                VideoUtil videoUtil = new VideoUtil(mediaView);
-                if (mediaUtil.hasVideo()) {
-                    videoUtil.fitSizeProperty();
-                } else {
-                    videoUtil.unbindSizeProperty();
-                }
-
-            });
-
-
-            mediaView.setMediaPlayer(mediaPlayer);
+            setMediaOnMediaPlayer(url);
         }
     }
 
     @FXML
     MediaView mediaView;
 
+    File selectFile(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select media");
+        return fileChooser.showOpenDialog(null);
+    }
+
+    void setMediaOnMediaPlayer(String url){
+        if (mediaPlayer != null) resetMediaPlayer();
+
+        media = new Media(url);            
+        mediaPlayer = new MediaPlayer(media);
+        
+        mediaPlayer.setOnReady(() -> {
+            handleMediaPlayer();
+        });
+
+        mediaView.setMediaPlayer(mediaPlayer);
+    }
+
     void resetMediaPlayer(){
         mediaPlayer.stop();
         playButton.setText("Play");
+    }
+
+    void handleMediaPlayer(){
+        MediaUtil mediaUtil = new MediaUtil(media);
+        VideoUtil videoUtil = new VideoUtil(mediaView);
+
+        if (mediaUtil.hasVideo()) 
+            videoUtil.fitSizeProperty();
+        else 
+            videoUtil.unbindSizeProperty();
     }
 }
