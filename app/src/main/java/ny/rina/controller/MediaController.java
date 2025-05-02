@@ -47,8 +47,10 @@ public class MediaController {
     
     @FXML
     void stop(){
-        if (mediaPlayer != null)
+        if (mediaPlayer != null){
             mediaPlayer.stop();
+            playButton.setText("Play");
+        }
     }
 
     @FXML
@@ -61,7 +63,7 @@ public class MediaController {
         File selectedFile = fileChooser.showOpenDialog(null);
 
         if (selectedFile != null) {
-
+            if (mediaPlayer != null) resetMediaPlayer();
             String url = selectedFile.toURI().toString();
             media = new Media(url);            
             mediaPlayer = new MediaPlayer(media);
@@ -85,4 +87,8 @@ public class MediaController {
     @FXML
     MediaView mediaView;
 
+    void resetMediaPlayer(){
+        mediaPlayer.stop();
+        playButton.setText("Play");
+    }
 }
