@@ -5,11 +5,14 @@ import java.io.File;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 import ny.rina.util.MediaUtil;
 import ny.rina.util.VideoUtil;
 
@@ -18,7 +21,21 @@ public class MediaController {
     MediaPlayer mediaPlayer;
 
     @FXML
+    MediaView mediaView;
+
+    @FXML 
+    Slider slider;
+
+    @FXML
     Button playButton;
+
+
+    @FXML
+    Button stopButton;
+
+
+    @FXML
+    Button selecButton;
 
     @FXML
     void play(ActionEvent event){
@@ -42,18 +59,12 @@ public class MediaController {
     }
 
     @FXML
-    Button stopButton;
-    
-    @FXML
     void stop(){
         if (mediaPlayer != null){
             mediaPlayer.stop();
             playButton.setText("Play");
         }
     }
-
-    @FXML
-    Button selecButton;
 
     @FXML
     void select(ActionEvent event){
@@ -65,7 +76,9 @@ public class MediaController {
     }
 
     @FXML
-    MediaView mediaView;
+    void sliderPressed(MouseEvent event){
+        mediaPlayer.seek(Duration.seconds(slider.getValue()));
+    }
 
     File selectFile(){
         FileChooser fileChooser = new FileChooser();
@@ -79,11 +92,22 @@ public class MediaController {
         media = new Media(url);            
         mediaPlayer = new MediaPlayer(media);
         
+
+        mediaPlayer.currentTimeProperty().addListener(((obs, oldTime, newTime) -> {
+            slider.setValue(newTime.toSeconds());
+        }));
+
         mediaPlayer.setOnReady(() -> {
             handleMediaPlayer();
+            initilizeSlider();
         });
 
         mediaView.setMediaPlayer(mediaPlayer);
+    }
+
+    void initilizeSlider(){
+        Duration duration = media.getDuration();
+        slider.setMax(duration.toSeconds());
     }
 
     void resetMediaPlayer(){
