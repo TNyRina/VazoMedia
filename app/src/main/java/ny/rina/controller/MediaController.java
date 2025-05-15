@@ -109,6 +109,7 @@ public class MediaController {
     File selectFile(){
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select media");
+        
         return fileChooser.showOpenDialog(null);
     }
 
@@ -117,20 +118,43 @@ public class MediaController {
 
         media = new Media(url);            
         mediaPlayer = new MediaPlayer(media);
-        
+
+        setUpMediaPlayer();
+        mediaPlayerAutoPlay();
+
+        mediaView.setMediaPlayer(mediaPlayer);
+    }
+
+    void setUpMediaPlayer(){
+        mediaPlayer.setOnReady(() -> {
+            mediaPlayerOnReady();
+        });
+
+        mediaPlayer.setOnEndOfMedia(()->{
+            mediaPlayerOnEndOfMedia();
+        });
 
         mediaPlayer.currentTimeProperty().addListener(((obs, oldTime, newTime) -> {
             slider.setValue(newTime.toSeconds());
             resetCurrentDurationLabel();
             setCurrentDuration(newTime.toSeconds());
         }));
+    }
 
-        mediaPlayer.setOnReady(() -> {
-            handleMediaPlayer();
-            initilizeSlider();
-        });
+    void mediaPlayerAutoPlay(){
+        mediaPlayer.setAutoPlay(true);
+        playButton.setText("Pause");
+    }
 
-        mediaView.setMediaPlayer(mediaPlayer);
+    void mediaPlayerOnReady(){
+        handleMediaPlayer();
+        initilizeSlider();
+    }
+
+    void mediaPlayerOnEndOfMedia(){
+        mediaPlayer.stop();
+        playButton.setText("Play");
+        resetCurrentDurationLabel();
     }
 
     void initilizeSlider(){
