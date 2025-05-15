@@ -5,6 +5,7 @@ import java.io.File;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
@@ -38,6 +39,24 @@ public class MediaController {
     Button selecButton;
 
     @FXML
+    Label totalDurationHoursLabel;
+
+    @FXML
+    Label totalDurationMinutesLabel;
+
+    @FXML
+    Label totalDurationSecondsLabel;
+
+    @FXML
+    Label currentDurationHoursLabel;
+
+    @FXML
+    Label currentDurationMinutesLabel;
+
+    @FXML
+    Label currentDurationSecondsLabel;
+
+    @FXML
     void play(ActionEvent event){
         if (mediaPlayer != null) {
             Status status = mediaPlayer.getStatus();
@@ -63,7 +82,14 @@ public class MediaController {
         if (mediaPlayer != null){
             mediaPlayer.stop();
             playButton.setText("Play");
+            resetCurrentDurationLabel();
         }
+    }
+
+    void resetCurrentDurationLabel(){
+        currentDurationHoursLabel.setText("00");
+        currentDurationMinutesLabel.setText("00");
+        currentDurationSecondsLabel.setText("00");
     }
 
     @FXML
@@ -95,6 +121,8 @@ public class MediaController {
 
         mediaPlayer.currentTimeProperty().addListener(((obs, oldTime, newTime) -> {
             slider.setValue(newTime.toSeconds());
+            resetCurrentDurationLabel();
+            setCurrentDuration(newTime.toSeconds());
         }));
 
         mediaPlayer.setOnReady(() -> {
@@ -107,7 +135,41 @@ public class MediaController {
 
     void initilizeSlider(){
         Duration duration = media.getDuration();
-        slider.setMax(duration.toSeconds());
+        Double totalDuration = duration.toSeconds();
+        slider.setMax(totalDuration);
+        setTotalDuration(totalDuration);
+    }
+
+    void setTotalDuration(Double totalDuration){
+        if (totalDuration >= 3600) {
+            totalDurationHoursLabel.setText(formatValueDuration(totalDuration / 3600));
+            totalDuration = totalDuration % 3600;
+        }
+
+        if (totalDuration >= 60) {
+            totalDurationMinutesLabel.setText(formatValueDuration(totalDuration / 60));
+            totalDuration = totalDuration % 60;
+        }
+
+        totalDurationSecondsLabel.setText(formatValueDuration(totalDuration));
+    }
+
+    void setCurrentDuration(Double newTime){
+        if (newTime >= 3600) {
+            currentDurationHoursLabel.setText(formatValueDuration(newTime / 3600));
+            newTime = newTime % 3600;
+        }
+
+        if (newTime >= 60) {
+            currentDurationMinutesLabel.setText(formatValueDuration(newTime / 60));
+            newTime = newTime % 60;
+        }
+
+        currentDurationSecondsLabel.setText(formatValueDuration(newTime));
+    }
+
+    String formatValueDuration(Double value){
+        return (value < 10) ? "0" + value.intValue() : String.valueOf(value.intValue());
     }
 
     void resetMediaPlayer(){

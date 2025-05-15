@@ -32,8 +32,25 @@
             <MediaView fx:id="mediaView" fitHeight="200.0" fitWidth="200.0" VBox.vgrow="ALWAYS" />
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
-                  <Slider fx:id="slider" onMousePressed="#sliderPressed" prefHeight="16.0" prefWidth="553.0" />
-                  <Label prefHeight="16.0" prefWidth="48.0" text="--/--" textAlignment="CENTER" />
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label fx:id="currentDurationHoursLabel" text="00" />
+                        <Label text=":" />
+                        <Label fx:id="currentDurationMinutesLabel" text="00" />
+                        <Label text=":" />
+                        <Label fx:id="currentDurationSecondsLabel" text="00" />
+                     </children>
+                  </HBox>
+                  <Slider fx:id="slider" onMousePressed="#sliderPressed" prefHeight="16.0" prefWidth="589.0" />
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label fx:id="totalDurationHoursLabel" text="00" />
+                        <Label text=":" />
+                        <Label fx:id="totalDurationMinutesLabel" text="00" />
+                        <Label text=":" />
+                        <Label fx:id="totalDurationSecondsLabel" text="00" />
+                     </children>
+                  </HBox>
                </children>
             </HBox>
          </children>
