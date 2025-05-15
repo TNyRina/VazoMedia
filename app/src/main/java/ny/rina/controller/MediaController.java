@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
@@ -39,6 +40,9 @@ public class MediaController {
     Button selecButton;
 
     @FXML
+    Button muteButton;
+
+    @FXML
     Label totalDurationHoursLabel;
 
     @FXML
@@ -55,6 +59,40 @@ public class MediaController {
 
     @FXML
     Label currentDurationSecondsLabel;
+
+    @FXML
+    ProgressBar volumeProgress;
+
+    @FXML
+    Button increaseVolumeButton;
+
+    @FXML
+    Button decreaseVolumeButton;
+
+    @FXML
+    void increaseVolume(){
+        double volume = mediaPlayer.getVolume();
+        if (volume < 1) mediaPlayer.setVolume(volume + 0.1);
+        handleVolume();
+    }
+
+    @FXML
+    void decreaseVolume(){
+        double volume = mediaPlayer.getVolume();
+        if (volume >= 0.1) mediaPlayer.setVolume(volume - 0.1);
+        handleVolume();
+    }
+
+    @FXML
+    void mute(){
+        if(mediaPlayer.getVolume() == 0){
+            mediaPlayer.setVolume(1);
+        } else {
+            mediaPlayer.setVolume(0);
+        }
+
+        handleVolume();
+    }
 
     @FXML
     void play(ActionEvent event){
@@ -109,7 +147,7 @@ public class MediaController {
     File selectFile(){
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select media");
-        
+
         return fileChooser.showOpenDialog(null);
     }
 
@@ -149,6 +187,11 @@ public class MediaController {
     void mediaPlayerOnReady(){
         handleMediaPlayer();
         initilizeSlider();
+        handleVolume();
+    }
+
+    void handleVolume(){
+        volumeProgress.setProgress(mediaPlayer.getVolume());
     }
 
     void mediaPlayerOnEndOfMedia(){
