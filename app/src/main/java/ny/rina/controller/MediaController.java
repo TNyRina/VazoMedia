@@ -13,10 +13,10 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.media.MediaPlayer.Status;
-import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import ny.rina.util.MediaUtil;
 import ny.rina.util.VideoUtil;
+import ny.rina.util.Util;
 
 public class MediaController {
     Media media;
@@ -79,16 +79,19 @@ public class MediaController {
     @FXML
     void decreaseVolume(){
         double volume = mediaPlayer.getVolume();
-        if (volume >= 0.1) mediaPlayer.setVolume(volume - 0.1);
+        if (volume >= 0.1) {
+            if((volume - 0.1) < 0.1) mediaPlayer.setVolume(0.0);
+            else  mediaPlayer.setVolume(volume - 0.1);
+        }
         handleVolume();
     }
 
     @FXML
     void mute(){
         if(mediaPlayer.getVolume() == 0){
-            mediaPlayer.setVolume(1);
+            mediaPlayer.setVolume(1.0);
         } else {
-            mediaPlayer.setVolume(0);
+            mediaPlayer.setVolume(0.0);
         }
 
         handleVolume();
@@ -124,15 +127,11 @@ public class MediaController {
         }
     }
 
-    void resetCurrentDurationLabel(){
-        currentDurationHoursLabel.setText("00");
-        currentDurationMinutesLabel.setText("00");
-        currentDurationSecondsLabel.setText("00");
-    }
+    
 
     @FXML
     void select(ActionEvent event){
-        File selectedFile = selectFile();
+        File selectedFile = MediaUtil.selectFile();
         if (selectedFile != null) {
             String url = selectedFile.toURI().toString();
             setMediaOnMediaPlayer(url);
@@ -142,13 +141,6 @@ public class MediaController {
     @FXML
     void sliderPressed(MouseEvent event){
         mediaPlayer.seek(Duration.seconds(slider.getValue()));
-    }
-
-    File selectFile(){
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select media");
-
-        return fileChooser.showOpenDialog(null);
     }
 
     void setMediaOnMediaPlayer(String url){
@@ -191,6 +183,7 @@ public class MediaController {
     }
 
     void handleVolume(){
+        System.out.println("Volume : " + mediaPlayer.getVolume());
         volumeProgress.setProgress(mediaPlayer.getVolume());
     }
 
@@ -209,34 +202,30 @@ public class MediaController {
 
     void setTotalDuration(Double totalDuration){
         if (totalDuration >= 3600) {
-            totalDurationHoursLabel.setText(formatValueDuration(totalDuration / 3600));
+            totalDurationHoursLabel.setText(Util.formatValueDuration(totalDuration / 3600));
             totalDuration = totalDuration % 3600;
         }
 
         if (totalDuration >= 60) {
-            totalDurationMinutesLabel.setText(formatValueDuration(totalDuration / 60));
+            totalDurationMinutesLabel.setText(Util.formatValueDuration(totalDuration / 60));
             totalDuration = totalDuration % 60;
         }
 
-        totalDurationSecondsLabel.setText(formatValueDuration(totalDuration));
+        totalDurationSecondsLabel.setText(Util.formatValueDuration(totalDuration));
     }
 
     void setCurrentDuration(Double newTime){
         if (newTime >= 3600) {
-            currentDurationHoursLabel.setText(formatValueDuration(newTime / 3600));
+            currentDurationHoursLabel.setText(Util.formatValueDuration(newTime / 3600));
             newTime = newTime % 3600;
         }
 
         if (newTime >= 60) {
-            currentDurationMinutesLabel.setText(formatValueDuration(newTime / 60));
+            currentDurationMinutesLabel.setText(Util.formatValueDuration(newTime / 60));
             newTime = newTime % 60;
         }
 
-        currentDurationSecondsLabel.setText(formatValueDuration(newTime));
-    }
-
-    String formatValueDuration(Double value){
-        return (value < 10) ? "0" + value.intValue() : String.valueOf(value.intValue());
+        currentDurationSecondsLabel.setText(Util.formatValueDuration(newTime));
     }
 
     void resetMediaPlayer(){
@@ -244,6 +233,9 @@ public class MediaController {
         playButton.setText("Play");
     }
 
+    /**
+     * Fit size of media view if media is a video
+     */
     void handleMediaPlayer(){
         MediaUtil mediaUtil = new MediaUtil(media);
         VideoUtil videoUtil = new VideoUtil(mediaView);
@@ -252,5 +244,11 @@ public class MediaController {
             videoUtil.fitSizeProperty();
         else 
             videoUtil.unbindSizeProperty();
+    }
+
+    void resetCurrentDurationLabel(){
+        currentDurationHoursLabel.setText("00");
+        currentDurationMinutesLabel.setText("00");
+        currentDurationSecondsLabel.setText("00");
     }
 }
