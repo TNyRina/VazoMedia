@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -73,7 +74,7 @@ public class MediaController {
     void increaseVolume(){
         double volume = mediaPlayer.getVolume();
         if (volume < 1) mediaPlayer.setVolume(volume + 0.1);
-        handleVolume();
+        refreshVolumeProgress();
     }
 
     @FXML
@@ -83,7 +84,15 @@ public class MediaController {
             if((volume - 0.1) < 0.1) mediaPlayer.setVolume(0.0);
             else  mediaPlayer.setVolume(volume - 0.1);
         }
-        handleVolume();
+        refreshVolumeProgress();
+    }
+    @FXML
+    void IncreaseOrDecreaseVlume(ScrollEvent event){
+        if(event.getDeltaY() != 0){
+            if (event.getDeltaY() > 0) increaseVolume();
+            else decreaseVolume();
+        }
+       
     }
 
     @FXML
@@ -94,7 +103,7 @@ public class MediaController {
             mediaPlayer.setVolume(0.0);
         }
 
-        handleVolume();
+        refreshVolumeProgress();
     }
 
     @FXML
@@ -139,6 +148,16 @@ public class MediaController {
     }
 
     @FXML
+    void progressBarPressed(MouseEvent event){
+        double mouseX = event.getX();
+        double width = volumeProgress.getWidth();
+        double percent = mouseX / width;
+
+        mediaPlayer.setVolume(percent);
+        refreshVolumeProgress();
+    }
+
+    @FXML
     void sliderPressed(MouseEvent event){
         mediaPlayer.seek(Duration.seconds(slider.getValue()));
     }
@@ -179,11 +198,10 @@ public class MediaController {
     void mediaPlayerOnReady(){
         handleMediaPlayer();
         initilizeSlider();
-        handleVolume();
+        refreshVolumeProgress();
     }
 
-    void handleVolume(){
-        System.out.println("Volume : " + mediaPlayer.getVolume());
+    void refreshVolumeProgress(){
         volumeProgress.setProgress(mediaPlayer.getVolume());
     }
 
