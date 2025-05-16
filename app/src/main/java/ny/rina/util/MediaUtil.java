@@ -1,5 +1,6 @@
 package ny.rina.util;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import javafx.scene.media.AudioTrack;
 import javafx.scene.media.Media;
 import javafx.scene.media.Track;
 import javafx.scene.media.VideoTrack;
+import javafx.stage.FileChooser;
 
 public class MediaUtil {
     Media media;
@@ -75,5 +77,12 @@ public class MediaUtil {
         if (this.hasVideo()) return videoEnabled && audioEnabled;
         
         return audioEnabled;
+    }
+
+    public static File selectFile(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select media");
+
+        return fileChooser.showOpenDialog(null);
     }
 }
