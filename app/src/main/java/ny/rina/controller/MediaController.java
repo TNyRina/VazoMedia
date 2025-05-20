@@ -1,11 +1,16 @@
 package ny.rina.controller;
 
 import java.io.File;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
@@ -22,6 +27,7 @@ import ny.rina.util.Util;
 public class MediaController {
     Media media;
     MediaPlayer mediaPlayer;
+    Media selectedMedia = null;
 
     @FXML
     MediaView mediaView;
@@ -69,6 +75,9 @@ public class MediaController {
 
     @FXML
     Button decreaseVolumeButton;
+
+    @FXML
+    ListView<Media> listView;
 
     @FXML
     void increaseVolume(){
@@ -162,16 +171,52 @@ public class MediaController {
         mediaPlayer.seek(Duration.seconds(slider.getValue()));
     }
 
+    @FXML
+    void onMouseClicked(MouseEvent event){
+        Media media = listView.getSelectionModel().getSelectedItem();
+        if (media != null) 
+            if (event.getClickCount() == 2)
+                setMediaOnMediaPlayer(media.getSource());
+            
+            
+    }
+
     void setMediaOnMediaPlayer(String url){
         if (mediaPlayer != null) resetMediaPlayer();
 
-        media = new Media(url);            
-        mediaPlayer = new MediaPlayer(media);
+        if (!url.isEmpty()){
+            media = new Media(url);   
+            mediaPlayer = new MediaPlayer(media);       
 
-        setUpMediaPlayer();
-        mediaPlayerAutoPlay();
+            customListView();
+            setUpMediaPlayer();
+            mediaPlayerAutoPlay();
 
-        mediaView.setMediaPlayer(mediaPlayer);
+            mediaView.setMediaPlayer(mediaPlayer);
+        }
+    }
+
+    void customListView(){
+        boolean mediaExists = listView.getItems().stream().anyMatch(m -> m.getSource().equals(media.getSource()));
+        if (!mediaExists){
+            listView.getItems().add(media);
+            listView.setCellFactory(p->{
+                return new ListCell<>(){
+                    @Override   
+                    protected void updateItem(Media media, boolean empty){
+                        super.updateItem(media, empty);
+
+                        if (media == null || empty){
+                            setGraphic(null);
+                        } else {
+                            Path path = Paths.get(URI.create(media.getSource()));
+                            Label fileName = new Label(path.getFileName().toString());
+                            setGraphic(fileName);
+                        }
+                    }
+                };
+            });
+        }
     }
 
     void setUpMediaPlayer(){
