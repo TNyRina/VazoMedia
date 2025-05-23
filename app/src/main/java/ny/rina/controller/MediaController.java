@@ -8,11 +8,14 @@ import java.nio.file.Paths;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.media.Media;
@@ -27,7 +30,10 @@ import ny.rina.util.Util;
 public class MediaController {
     Media media;
     MediaPlayer mediaPlayer;
-    Media selectedMedia = null;
+    ContextMenu contextMenu;
+    MenuItem playItem;
+    MenuItem stopItem;
+    MenuItem deleteItem;
 
     @FXML
     MediaView mediaView;
@@ -80,6 +86,25 @@ public class MediaController {
     ListView<Media> listView;
 
     @FXML
+    public void initialize(){
+        playItem = new MenuItem("Play");
+        stopItem = new MenuItem("Stop");
+        deleteItem = new MenuItem("Delete");
+
+        playItem.setOnAction(e -> {
+            playItemAction(e);
+        });
+
+        stopItem.setOnAction(e -> {
+            stop();
+        });
+
+        deleteItem.setOnAction(e -> {
+            deleteItemAction();
+        });
+    }
+
+    @FXML
     void increaseVolume(){
         double volume = mediaPlayer.getVolume();
         if (volume < 1) mediaPlayer.setVolume(volume + 0.1);
@@ -125,10 +150,12 @@ public class MediaController {
                 case STOPPED:
                     mediaPlayer.play();
                     playButton.setText("Pause");
+                    playItem.setText("Pause");
                     break;
                 case PLAYING:
                     mediaPlayer.pause();
                     playButton.setText("Play");
+                    playItem.setText("Play");
                     break;
                 default:
                     break;
@@ -173,25 +200,91 @@ public class MediaController {
 
     @FXML
     void onMouseClicked(MouseEvent event){
+        destroyContextMenu();
         Media media = listView.getSelectionModel().getSelectedItem();
-        if (media != null) 
+        if (media != null) {
             if (event.getClickCount() == 2)
                 setMediaOnMediaPlayer(media.getSource());
-            
+            if (event.getButton() == MouseButton.SECONDARY)
+                showContextMenu(event.getScreenX(), event.getScreenY(), media);
+        }
             
     }
 
+    void destroyContextMenu(){
+        if (contextMenu != null) {
+            contextMenu.getItems().clear(); 
+            contextMenu.hide();            
+            contextMenu = null;  
+        }
+    }
+
+    void showContextMenu(Double x_pos, Double y_pos, Media media){
+        contextMenu = new ContextMenu();
+        if (selectedMediaIsRunning()) {
+            Status status = mediaPlayer.getStatus(); 
+            switch (status) {
+                case READY:
+                case PAUSED:
+                case STOPPED:
+                    playItem.setText("Play");
+                    break;
+                case PLAYING:
+                    playItem.setText("Pause");
+                    break;
+                default:
+                    break;
+            }
+            stopItem.setDisable(false);
+        } else {
+            playItem.setText("Play");
+            stopItem.setDisable(true);
+        }
+
+        contextMenu.getItems().addAll(playItem, stopItem, deleteItem);
+        contextMenu.show(listView, x_pos, y_pos);
+    }
+
+    void deleteItemAction(){
+        if (selectedMediaIsRunning()) {
+            stop();
+            mediaView.setMediaPlayer(null);
+        }
+
+        listView.getItems().remove(getSelectedMedia());
+    }
+
+    Media getSelectedMedia(){
+        return listView.getSelectionModel().getSelectedItem();
+    }
+
+    void playItemAction(ActionEvent e){
+        if (!selectedMediaIsRunning()){
+            resetMediaPlayer();
+            mediaPlayer = new MediaPlayer(getSelectedMedia());
+            setUpMediaPlayer();
+            mediaView.setMediaPlayer(mediaPlayer);
+        }
+
+        play(e);
+    }
+
+    boolean selectedMediaIsRunning(){
+        if (mediaPlayer == null) return false;
+        Media selelectMedia = listView.getSelectionModel().getSelectedItem();
+
+        return mediaPlayer.getMedia().equals(selelectMedia);
+    }
+
     void setMediaOnMediaPlayer(String url){
-        if (mediaPlayer != null) resetMediaPlayer();
+        resetMediaPlayer();
 
         if (!url.isEmpty()){
             media = new Media(url);   
             mediaPlayer = new MediaPlayer(media);       
-
+        
             customListView();
-            setUpMediaPlayer();
-            mediaPlayerAutoPlay();
-
+            setUpMediaPlayer();           
             mediaView.setMediaPlayer(mediaPlayer);
         }
     }
@@ -233,6 +326,8 @@ public class MediaController {
             resetCurrentDurationLabel();
             setCurrentDuration(newTime.toSeconds());
         }));
+
+        mediaPlayerAutoPlay();
     }
 
     void mediaPlayerAutoPlay(){
@@ -292,8 +387,11 @@ public class MediaController {
     }
 
     void resetMediaPlayer(){
-        mediaPlayer.stop();
-        playButton.setText("Play");
+        if(mediaPlayer != null){
+            mediaPlayer.stop();
+            mediaPlayer = null;
+            playButton.setText("Play");
+        }
     }
 
     /**
